@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
+
 @Entity
 @Table(name = "stay")
 @JsonDeserialize(builder = Stay.Builder.class)
@@ -21,6 +23,9 @@ public class Stay implements Serializable {
     @JoinColumn(name = "user_id")
     private User host;
 
+    @OneToMany(mappedBy = "stay", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    private List<StayImage> images;
+
     public Stay() {}
 
     private Stay(Builder builder) {
@@ -30,6 +35,7 @@ public class Stay implements Serializable {
         this.address = builder.address;
         this.guestNumber = builder.guestNumber;
         this.host = builder.host;
+        this.images = builder.images;
     }
 
     public Long getId() {
@@ -56,6 +62,17 @@ public class Stay implements Serializable {
         return host;
     }
 
+    public List<StayImage> getImages() {
+        return images;
+    }
+
+    public Stay setImages(List<StayImage> images) {
+        this.images = images;
+        return this;
+    }
+
+
+
     public static class Builder {
 
         @JsonProperty("id")
@@ -75,6 +92,9 @@ public class Stay implements Serializable {
 
         @JsonProperty("host")
         private User host;
+
+        @JsonProperty("images")
+        private List<StayImage> images;
 
         public Builder setId(Long id) {
             this.id = id;
@@ -103,6 +123,11 @@ public class Stay implements Serializable {
 
         public Builder setHost(User host) {
             this.host = host;
+            return this;
+        }
+
+        public Builder setImages(List<StayImage> images) {
+            this.images = images;
             return this;
         }
 
