@@ -13,4 +13,7 @@ public interface StayRepository extends JpaRepository<Stay, Long> {
     //id + user(double insurance)
     Stay findByIdAndHost(Long id, User user);
 
+    List<Stay> findByIdInAndGuestNumberGreaterThanEqual(List<Long> ids, int guestNumber);
+
+
 }
