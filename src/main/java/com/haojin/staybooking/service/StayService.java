@@ -1,9 +1,11 @@
 package com.haojin.staybooking.service;
 
 import com.haojin.staybooking.exception.StayNotExistException;
+import com.haojin.staybooking.model.Location;
 import com.haojin.staybooking.model.Stay;
 import com.haojin.staybooking.model.StayImage;
 import com.haojin.staybooking.model.User;
+import com.haojin.staybooking.repository.LocationRepository;
 import com.haojin.staybooking.repository.StayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,10 +26,16 @@ public class StayService {
 
     private ImageStorageService imageStorageService;
 
+    private LocationRepository locationRepository;
+
+    private GeoCodingService geoCodingService;
+
     @Autowired
-    public StayService(StayRepository stayRepository, ImageStorageService imageStorageService) {
+    public StayService(StayRepository stayRepository, ImageStorageService imageStorageService, LocationRepository locationRepository, GeoCodingService geoCodingService) {
         this.stayRepository = stayRepository;
         this.imageStorageService = imageStorageService;
+        this.locationRepository = locationRepository;
+        this.geoCodingService = geoCodingService;
     }
 
     public List<Stay> listByUser(String username) {
@@ -50,8 +58,13 @@ public class StayService {
             stayImages.add(new StayImage(mediaLink, stay));
         }
         stay.setImages(stayImages);
-
         stayRepository.save(stay);
+
+        //store data to elasticsearch
+        Location location = geoCodingService.getLatLng(stay.getId(), stay.getAddress());
+        locationRepository.save(location);
+
+
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
