@@ -1,7 +1,9 @@
 package com.haojin.staybooking.controller;
 
+import com.haojin.staybooking.model.Reservation;
 import com.haojin.staybooking.model.Stay;
 import com.haojin.staybooking.model.User;
+import com.haojin.staybooking.service.ReservationService;
 import com.haojin.staybooking.service.StayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +17,12 @@ public class StayController {
 
     private StayService stayService;
 
+    private ReservationService reservationService;
+
     @Autowired
-    public StayController(StayService stayService) {
+    public StayController(StayService stayService, ReservationService reservationService) {
         this.stayService = stayService;
+        this.reservationService = reservationService;
     }
 
     @GetMapping(value = "/stays")
@@ -53,5 +58,11 @@ public class StayController {
     public void deleteStay(@PathVariable Long stayId, Principal principal) {
         stayService.delete(stayId, principal.getName());
     }
+
+    @GetMapping(value = "/stays/reservations/{stayId}")
+    public List<Reservation> listReservations(@PathVariable Long stayId) {
+        return reservationService.listByStay(stayId);
+    }
+
 
 }

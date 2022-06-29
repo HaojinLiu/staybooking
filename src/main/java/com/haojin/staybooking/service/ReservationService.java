@@ -1,6 +1,7 @@
 package com.haojin.staybooking.service;
 
 import com.haojin.staybooking.exception.ReservationCollisionException;
+import com.haojin.staybooking.exception.ReservationNotFoundException;
 import com.haojin.staybooking.model.*;
 import com.haojin.staybooking.repository.ReservationRepository;
 import com.haojin.staybooking.repository.StayReservationDateRepository;
@@ -49,7 +50,18 @@ public class ReservationService {
 
         stayReservationDateRepository.saveAll(reservedDates);
         reservationRepository.save(reservation);
-
     }
+
+    public void delete(Long reservationId, String username) {
+        Reservation reservation = reservationRepository.findByIdAndGuest(reservationId, new User.Builder().setUsername(username).build());
+        if (reservation == null) {
+            throw new ReservationNotFoundException("Reservation is not available");
+        }
+        for (LocalDate date = reservation.getCheckinDate(); date.isBefore(reservation.getCheckoutDate()); date = date.plusDays(1)) {
+            stayReservationDateRepository.deleteById(new StayReservedDateKey(reservation.getStay().getId(), date));
+        }
+        reservationRepository.deleteById(reservationId);
+    }
+
 
 }
